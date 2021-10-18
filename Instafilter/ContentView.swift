@@ -10,16 +10,21 @@ import SwiftUI
 struct ContentView: View {
     @State private var blurAmount: CGFloat = 0 {
         didSet {
-            print("New value is \(blurAmount)") // Doesn't get printed, because of binding nonmutating set
+            print("New value is \(blurAmount)") // Now it gets printed, because of the new binding set
         }
     }
     
     var body: some View {
+        let blur = Binding<CGFloat>(
+            get: { self.blurAmount },
+            set: { self.blurAmount = $0 }
+        )
+        
         VStack {
             Text("Hello, world!")
                 .blur(radius: blurAmount)
             
-            Slider(value: $blurAmount, in: 0...20)
+            Slider(value: blur, in: 0...20)
         }
     }
 }
