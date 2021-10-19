@@ -7,43 +7,52 @@
 
 import SwiftUI
 
-class ImageSaver: NSObject { // Necessary for doing something after the picked photo is saved to PhotoAlbum
-    func writeToPhotoAlbum(image: UIImage) {
-        UIImageWriteToSavedPhotosAlbum(image, self, #selector(saveError), nil)
-    }
-    
-    @objc func saveError(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
-        print("Save finished!")
-    }
-}
-
 struct ContentView: View {
     @State private var image: Image?
-    @State private var showingImagePicker = false
-    @State private var inputImage: UIImage?
+    @State private var filterIntensity = 0.5
     
     var body: some View {
-        VStack {
-            image?
-                .resizable()
-                .scaledToFit()
-            
-            Button("Select Image") {
-                self.showingImagePicker = true
+        NavigationView {
+            VStack {
+                ZStack {
+                    Rectangle()
+                        .fill(Color.gray)
+                    
+                    if let image = image {
+                        image
+                            .resizable()
+                            .scaledToFit()
+                    } else {
+                        Text("Tap to select a picture")
+                            .foregroundColor(.white)
+                            .font(.headline)
+                    }
+                }
+                .onTapGesture {
+                    // select an image
+                }
+                
+                HStack {
+                    Text("Intensity")
+                    Slider(value: self.$filterIntensity)
+                }
+                .padding(.vertical)
+                
+                HStack {
+                    Button("Change Filter") {
+                        // change filter
+                    }
+                    
+                    Spacer()
+                    
+                    Button("Save") {
+                        // save the picture
+                    }
+                }
             }
+            .padding([.horizontal, .bottom])
+            .navigationTitle("Instafilter")
         }
-        .sheet(isPresented: $showingImagePicker, onDismiss: loadImage) {
-            ImagePicker(image: self.$inputImage)
-        }
-    }
-    
-    func loadImage() {
-        guard let inputImage = inputImage else { return }
-        image = Image(uiImage: inputImage)
-//        UIImageWriteToSavedPhotosAlbum(inputImage, nil, nil, nil) // saves the picked photo without doing anything after that
-        
-        let imageSaver = ImageSaver()
-        imageSaver.writeToPhotoAlbum(image: inputImage)
     }
 }
 
