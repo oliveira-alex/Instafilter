@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E7A9A385271EE29900189DDF /* ImageSaver.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7A9A384271EE29900189DDF /* ImageSaver.swift */; };
 		E7FC2E95271D91CE0056D0E8 /* InstafilterApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7FC2E94271D91CE0056D0E8 /* InstafilterApp.swift */; };
 		E7FC2E97271D91CE0056D0E8 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7FC2E96271D91CE0056D0E8 /* ContentView.swift */; };
 		E7FC2E99271D91D00056D0E8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E7FC2E98271D91D00056D0E8 /* Assets.xcassets */; };
@@ -15,6 +16,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		E7A9A384271EE29900189DDF /* ImageSaver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageSaver.swift; sourceTree = "<group>"; };
 		E7FC2E91271D91CE0056D0E8 /* Instafilter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Instafilter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E7FC2E94271D91CE0056D0E8 /* InstafilterApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstafilterApp.swift; sourceTree = "<group>"; };
 		E7FC2E96271D91CE0056D0E8 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -55,6 +57,7 @@
 			children = (
 				E7FC2E94271D91CE0056D0E8 /* InstafilterApp.swift */,
 				E7FC2E96271D91CE0056D0E8 /* ContentView.swift */,
+				E7A9A384271EE29900189DDF /* ImageSaver.swift */,
 				E7FC2EA2271DAC340056D0E8 /* ImagePicker.swift */,
 				E7FC2E98271D91D00056D0E8 /* Assets.xcassets */,
 				E7FC2E9A271D91D00056D0E8 /* Preview Content */,
@@ -143,6 +146,7 @@
 				E7FC2EA3271DAC340056D0E8 /* ImagePicker.swift in Sources */,
 				E7FC2E97271D91CE0056D0E8 /* ContentView.swift in Sources */,
 				E7FC2E95271D91CE0056D0E8 /* InstafilterApp.swift in Sources */,
+				E7A9A385271EE29900189DDF /* ImageSaver.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
