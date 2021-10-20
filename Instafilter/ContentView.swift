@@ -25,7 +25,9 @@ struct ContentView: View {
     
     @State private var showingFilterSheet = false
     @State private var showingImagePicker = false
-    @State private var showingNoImageErrorAlert = false
+    @State private var showingAlert = false
+    @State private var alertTitle = ""
+    @State private var alertMessage = ""
     
     @State private var inputImage: UIImage?
     @State private var processedImage: UIImage?
@@ -33,6 +35,10 @@ struct ContentView: View {
     @State var currentFilter: CIFilter?
     @State private var currentFilterName = "Select a Filter"
     let context = CIContext()
+    
+    @State private var imageSaved = false
+    @State private var imageSavedAnimationOpacityAmount: CGFloat = 0
+    @State private var errorSavingAnimationOpacityAmount: CGFloat = 0
     
     var body: some View {
         let intensity = Binding<Double>(
@@ -50,8 +56,10 @@ struct ContentView: View {
                 self.filterRadius
             },
             set: {
-                self.filterRadius = $0
-                self.applyProcessing()
+                if $0 > 0.01 {
+                    self.filterRadius = $0
+                    self.applyProcessing()
+                }
             }
         )
         
@@ -80,6 +88,22 @@ struct ContentView: View {
                             .foregroundColor(.white)
                             .font(.headline)
                     }
+                    
+                    Text("Saved")
+                        .padding(25)
+                        .foregroundColor(.white)
+                        .background(Color.black)
+                        .cornerRadius(10)
+                        .opacity(imageSavedAnimationOpacityAmount)
+                        .animation(imageSavedAnimationOpacityAmount == 1 ? .easeOut : .easeIn(duration: 1) )
+                    
+                    Text("Error Saving")
+                        .padding(25)
+                        .foregroundColor(.white)
+                        .background(Color.black)
+                        .cornerRadius(10)
+                        .opacity(errorSavingAnimationOpacityAmount)
+                        .animation(errorSavingAnimationOpacityAmount == 1 ? .easeOut : .easeIn(duration: 1) )
                 }
                 .onTapGesture {
                     self.showingImagePicker = true
@@ -116,7 +140,9 @@ struct ContentView: View {
                 HStack {
                     Button(currentFilterName) {
                         guard let _ = self.image else {
-                            showingNoImageErrorAlert = true
+                            alertTitle = "No Picture Selected"
+                            alertMessage = "You need to select an picture first."
+                            showingAlert = true
                             return
                         }
                         
@@ -126,27 +152,41 @@ struct ContentView: View {
                     Spacer()
                     
                     Button("Save") {
-                        guard let processedImage = self.processedImage else {
-                            showingNoImageErrorAlert = true
+                        guard let _ = self.image else {
+                            alertTitle = "No Picture Selected"
+                            alertMessage = "You need to select an picture first."
+                            showingAlert = true
                             return
                         }
-                        
+
+                        guard let processedImage = self.processedImage else {
+                            alertTitle = "No Filter Selected"
+                            alertMessage = "You need to select a filter first."
+                            showingAlert = true
+                            return
+                        }
+
                         let imageSaver = ImageSaver()
-                        
+
+                        imageSaver.writeToPhotoAlbum(image: processedImage)
+
                         imageSaver.successHandler = {
+                            imageSaved = true
+                            imageSavedAnimationOpacityAmount = 1
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { self.imageSavedAnimationOpacityAmount = 0 }
                             print("Success!")
                         }
-                        
+
                         imageSaver.errorHandler = {
+                            errorSavingAnimationOpacityAmount = 1
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { self.errorSavingAnimationOpacityAmount = 0 }
                             print("Oops: \($0.localizedDescription)")
                         }
-                        
-                        imageSaver.writeToPhotoAlbum(image: processedImage)
                     }
-//                    .disabled(image == nil ? true : false)
-                    .alert(isPresented: $showingNoImageErrorAlert) {
-                        Alert(title: Text("No Picture Selected"),
-                              message: Text("You need to select an picture first."),
+                    .disabled(imageSaved == false ? false : true)
+                    .alert(isPresented: $showingAlert) {
+                        Alert(title: Text(alertTitle),
+                              message: Text(alertMessage),
                               dismissButton: .default(Text("OK"))
                         )
                     }
@@ -176,13 +216,14 @@ struct ContentView: View {
         guard let inputImage = inputImage else { return }
 //        image = Image(uiImage: inputImage)
         
-
         let beginImage = CIImage(image: inputImage)
         if let _ = currentFilter {
             currentFilter?.setValue(beginImage, forKey: kCIInputImageKey)
             applyProcessing()
         } else {
             image = Image(uiImage: inputImage)
+            
+            imageSaved = false
         }
     }
     
@@ -199,6 +240,8 @@ struct ContentView: View {
             let uiImage = UIImage(cgImage: cgimg)
             image = Image(uiImage: uiImage)
             processedImage = uiImage
+            
+            imageSaved = false
         }
     }
     
@@ -236,5 +279,6 @@ struct ContentView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
+//            .environment(\.colorScheme, .dark)
     }
 }
