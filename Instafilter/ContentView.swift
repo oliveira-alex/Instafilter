@@ -10,6 +10,10 @@ import CoreImage.CIFilterBuiltins
 import SwiftUI
 
 struct ContentView: View {
+    enum FilterNames: String {
+        case Crystallize
+    }
+    
     @State private var image: Image?
     @State private var filterIntensity = 0.0
     
@@ -20,7 +24,8 @@ struct ContentView: View {
     @State private var inputImage: UIImage?
     @State private var processedImage: UIImage?
     
-    @State var currentFilter: CIFilter = CIFilter.sepiaTone()
+    @State var currentFilter: CIFilter?
+    @State private var currentFilterName = "Select a Filter"
     let context = CIContext()
     
     var body: some View {
@@ -62,7 +67,7 @@ struct ContentView: View {
                 .padding(.vertical)
                 
                 HStack {
-                    Button("Change Filter") {
+                    Button(currentFilterName) {
                         self.showingFilterSheet = true
                     }
                     
@@ -87,6 +92,12 @@ struct ContentView: View {
                         imageSaver.writeToPhotoAlbum(image: processedImage)
                     }
 //                    .disabled(image == nil ? true : false)
+                    .alert(isPresented: $showingNoImageErrorAlert) {
+                        Alert(title: Text("No Image Selected"),
+                              message: Text("You need to select an image first."),
+                              dismissButton: .default(Text("OK"))
+                        )
+                    }
                 }
             }
             .padding([.horizontal, .bottom])
@@ -106,12 +117,6 @@ struct ContentView: View {
                     .cancel()
                 ])
             }
-            .alert(isPresented: $showingNoImageErrorAlert) {
-                Alert(title: Text("No Image Selected"),
-                      message: Text("You need to select an image first."),
-                      dismissButton: .default(Text("OK"))
-                )
-            }
         }
     }
     
@@ -119,22 +124,23 @@ struct ContentView: View {
         guard let inputImage = inputImage else { return }
 //        image = Image(uiImage: inputImage)
         
-        filterIntensity = 0.5
-        
+
         let beginImage = CIImage(image: inputImage)
-        currentFilter.setValue(beginImage, forKey: kCIInputImageKey)
+        guard let _ = currentFilter else { return }
+        filterIntensity = 0.5
+        currentFilter?.setValue(beginImage, forKey: kCIInputImageKey)
         applyProcessing()
     }
     
     func applyProcessing() {
 //        currentFilter.intensity = Float(filterIntensity)
 //        currentFilter.setValue(filterIntensity, forKey: kCIInputIntensityKey)
-        let inputKeys = currentFilter.inputKeys
-        if inputKeys.contains(kCIInputIntensityKey) { currentFilter.setValue(filterIntensity, forKey: kCIInputIntensityKey) }
-        if inputKeys.contains(kCIInputRadiusKey) { currentFilter.setValue(filterIntensity * 200, forKey: kCIInputRadiusKey) }
-        if inputKeys.contains(kCIInputScaleKey) { currentFilter.setValue (filterIntensity * 10, forKey: kCIInputScaleKey) }
+        guard let inputKeys = currentFilter?.inputKeys else { return }
+        if inputKeys.contains(kCIInputIntensityKey) { currentFilter?.setValue(filterIntensity, forKey: kCIInputIntensityKey) }
+        if inputKeys.contains(kCIInputRadiusKey) { currentFilter?.setValue(filterIntensity * 200, forKey: kCIInputRadiusKey) }
+        if inputKeys.contains(kCIInputScaleKey) { currentFilter?.setValue (filterIntensity * 10, forKey: kCIInputScaleKey) }
         
-        guard let outputImage = currentFilter.outputImage else { return }
+        guard let outputImage = currentFilter?.outputImage else { return }
         
         if let cgimg = context.createCGImage(outputImage, from: outputImage.extent) {
             let uiImage = UIImage(cgImage: cgimg)
@@ -145,6 +151,7 @@ struct ContentView: View {
     
     func setFilter(_ filter: CIFilter) {
         currentFilter = filter
+        currentFilterName = String(currentFilter!.name.dropFirst(2))
         loadImage()
     }
 }
