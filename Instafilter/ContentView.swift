@@ -15,6 +15,8 @@ struct ContentView: View {
     
     @State private var showingFilterSheet = false
     @State private var showingImagePicker = false
+    @State private var showingNoImageErrorAlert = false
+    
     @State private var inputImage: UIImage?
     @State private var processedImage: UIImage?
     
@@ -67,7 +69,10 @@ struct ContentView: View {
                     Spacer()
                     
                     Button("Save") {
-                        guard let processedImage = self.processedImage else { return }
+                        guard let processedImage = self.processedImage else {
+                            showingNoImageErrorAlert = true
+                            return
+                        }
                         
                         let imageSaver = ImageSaver()
                         
@@ -81,7 +86,7 @@ struct ContentView: View {
                         
                         imageSaver.writeToPhotoAlbum(image: processedImage)
                     }
-                    .disabled(image == nil ? true : false)
+//                    .disabled(image == nil ? true : false)
                 }
             }
             .padding([.horizontal, .bottom])
@@ -100,6 +105,12 @@ struct ContentView: View {
                     .default(Text("Vignette")) { self.setFilter(CIFilter.vignette() )},
                     .cancel()
                 ])
+            }
+            .alert(isPresented: $showingNoImageErrorAlert) {
+                Alert(title: Text("No Image Selected"),
+                      message: Text("You need to select an image first."),
+                      dismissButton: .default(Text("OK"))
+                )
             }
         }
     }
